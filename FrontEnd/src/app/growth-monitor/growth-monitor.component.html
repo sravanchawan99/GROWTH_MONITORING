@@ -1,0 +1,38 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="card responsive-card">
+  <h2 class="title">Growth Monitoring Zone Predictor</h2>
+
+  <div class="grid">
+    <div class="field">
+      <label for="height">ఎత్తు(సెం.మీ)/ Height (cm)</label>
+      <input id="height" type="number" inputmode="decimal" formControlName="height" placeholder="e.g., 108" />
+      <small class="error" *ngIf="form.controls['height'].touched && form.controls['height'].invalid">
+        Height is required and must be greater than 0.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="weight">బరువు(కీ.గ్రా)/ Weight (kg)</label>
+      <input id="weight" type="number" inputmode="decimal" formControlName="weight" placeholder="e.g., 12" />
+      <small class="error" *ngIf="form.controls['weight'].touched && form.controls['weight'].invalid">
+        Weight is required and must be greater than 0.
+      </small>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="submit-btn" type="submit" [disabled]="loading || form.invalid">
+      {{ loading ? 'Submitting...' : 'Submit' }}
+    </button>
+  </div>
+</form>
+
+<div *ngIf="apiResult" class="result responsive-result" [ngClass]="zoneClass()">
+    <div class="zone-line">
+      <strong>Zone:</strong>
+      <span class="zone-chip">{{ apiResult.zone }}</span>
+    </div>
+</div>
+
+<div *ngIf="errorMsg" class="error-banner responsive-error">
+  {{ errorMsg }}
+</div>

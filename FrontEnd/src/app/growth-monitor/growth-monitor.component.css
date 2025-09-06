@@ -1,0 +1,141 @@
+/* Base (mobile-first) */
+:host {
+  display: block;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.title {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  margin: 0 0 12px 0;
+}
+
+.responsive-card {
+  width: 100%;
+  max-width: 640px;          /* keeps nice width on larger screens */
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr; /* single column on phones */
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.field input[type='number'] {
+  width: 100%;
+  padding: 12px 14px;             /* comfortable tap target */
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.submit-btn {
+  width: 100%;                    /* full width on phones */
+  margin-top: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.submit-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+/* Result and error blocks */
+.responsive-result {
+  width: 100%;
+  max-width: 640px;
+  margin: 12px auto 0 auto;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.responsive-error {
+  width: 100%;
+  max-width: 640px;
+  margin: 12px auto 0 auto;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+/* Zone color mappings (unchanged) */
+.zone-red { background: #fee2e2; border: 1px solid #ef4444; }
+.zone-yellow { background: #fef9c3; border: 1px solid #eab308; }
+.zone-green { background: #dcfce7; border: 1px solid #22c55e; }
+.zone-unknown { background: #e5e7eb; border: 1px solid #9ca3af; }
+
+.result .result-content { display: grid; gap: 8px; }
+.zone-line { display: flex; align-items: center; gap: 8px; }
+.zone-chip {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.3);
+  font-weight: 700;
+}
+
+/* Enhancements for small tablets and up */
+@media (min-width: 480px) {
+  .title { font-size: 1.25rem; }
+  .field input[type='number'] { font-size: 1.05rem; }
+  .submit-btn { font-size: 1.05rem; }
+}
+
+/* Enhancements for tablets/desktops */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on larger screens */
+    gap: 16px;
+  }
+  .submit-btn {
+    width: auto;                /* natural width on larger screens */
+    min-width: 160px;
+  }
+}
+.actions {
+  display: flex;
+  justify-content: center;   /* center horizontally */
+  margin-top: 12px;
+  width: 100%;
+}
+
+.submit-btn {
+  width: 100%;               /* full width on phones */
+  max-width: 260px;          /* cap width so it looks centered and tidy */
+}
+
+@media (min-width: 768px) {
+  .submit-btn {
+    width: auto;             /* natural width on larger screens */
+    min-width: 180px;
+  }
+}
