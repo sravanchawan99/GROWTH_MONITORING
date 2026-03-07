@@ -37,6 +37,7 @@ jobs:
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
           package: BackEnd
+          remote-build: true
 
   deploy-frontend:
     name: Build and Deploy Angular App to Static Web App
