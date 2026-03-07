@@ -44,7 +44,16 @@ jobs:
           inlineScript: |
             set -euo pipefail
             az account set --subscription "${AZURE_SUBSCRIPTION_ID}"
+            echo "==> Active subscription"
+            az account show --query "{id:id,name:name,tenantId:tenantId}" -o table
 
+            echo "==> Ensure required resource providers are registered"
+            az provider register --namespace Microsoft.Storage --subscription "$AZURE_SUBSCRIPTION_ID" --wait
+            az provider register --namespace Microsoft.Web --subscription "$AZURE_SUBSCRIPTION_ID" --wait
+            az provider show --namespace Microsoft.Storage --subscription "$AZURE_SUBSCRIPTION_ID" --query registrationState -o tsv
+            az provider show --namespace Microsoft.Web --subscription "$AZURE_SUBSCRIPTION_ID" --query registrationState -o tsv
+
+            echo "==> Create/Update resource group"
             az group create \
               --name "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION" \
@@ -54,6 +63,7 @@ jobs:
             SUFFIX=${CLEAN_SUB_ID:0:8}
             STORAGE_ACCOUNT_NAME=$(echo "${STORAGE_ACCOUNT_PREFIX}${SUFFIX}" | tr '[:upper:]' '[:lower:]' | cut -c1-24)
 
+            echo "==> Create storage account: $STORAGE_ACCOUNT_NAME"
             az storage account create \
               --name "$STORAGE_ACCOUNT_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -62,6 +72,7 @@ jobs:
               --kind StorageV2 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
+            echo "==> Create backend app service plan"
             az appservice plan create \
               --name "$FUNCTIONS_PLAN_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -70,6 +81,7 @@ jobs:
               --sku B1 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
+            echo "==> Create frontend app service plan"
             az appservice plan create \
               --name "$WEB_PLAN_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -78,6 +90,7 @@ jobs:
               --sku B1 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
+            echo "==> Create/Update function app"
             if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Function App already exists. Skipping create."
             else
@@ -93,12 +106,14 @@ jobs:
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
+            echo "==> Configure function app settings"
             az functionapp config appsettings set \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
+            echo "==> Create/Update frontend web app"
             if az webapp show --name "$WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Web App already exists. Skipping create."
             else
@@ -110,12 +125,14 @@ jobs:
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
+            echo "==> Configure web app startup"
             az webapp config set \
               --name "$WEB_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa" \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
+            echo "==> Configure function CORS"
             FRONTEND_ORIGIN="https://${WEB_APP_NAME}.azurewebsites.net"
             EXISTING_CORS=$(az functionapp cors show \
               --name "$FUNCTION_APP_NAME" \
