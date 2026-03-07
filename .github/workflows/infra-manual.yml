@@ -1,4 +1,4 @@
-name: Provision Azure Infrastructure (Manual)
+name: Build and Deploy Infrastructure
 
 on:
   workflow_dispatch:
@@ -11,13 +11,11 @@ env:
   AZURE_LOCATION: eastasia
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
-  WEB_APP_NAME: app-growthmonitoring
-  FUNCTIONS_PLAN_NAME: asp-growthmonitoring-fn
-  WEB_PLAN_NAME: asp-growthmonitoring-web
+  STATIC_WEB_APP_NAME: app-growthmonitoring
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
 
 jobs:
-  provision:
+  Deploy_Infrastucure:
     environment: growthmonitoring
     runs-on: ubuntu-latest
     steps:
@@ -28,18 +26,24 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Provision resources
+      - name: Deploy
         uses: azure/cli@v2
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         with:
           inlineScript: |
             set -euo pipefail
+            az account set --subscription "${AZURE_SUBSCRIPTION_ID}"
+
+            az provider register --namespace Microsoft.Storage --subscription "$AZURE_SUBSCRIPTION_ID" --wait
+            az provider register --namespace Microsoft.Web --subscription "$AZURE_SUBSCRIPTION_ID" --wait
 
             az group create \
               --name "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION"
+              --location "$AZURE_LOCATION" \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            SUB_ID=$(az account show --query id -o tsv)
-            CLEAN_SUB_ID=$(echo "$SUB_ID" | tr -d '-')
+            CLEAN_SUB_ID=$(echo "$AZURE_SUBSCRIPTION_ID" | tr -d '-')
             SUFFIX=${CLEAN_SUB_ID:0:8}
             STORAGE_ACCOUNT_NAME=$(echo "${STORAGE_ACCOUNT_PREFIX}${SUFFIX}" | tr '[:upper:]' '[:lower:]' | cut -c1-24)
 
@@ -48,66 +52,58 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION" \
               --sku Standard_LRS \
-              --kind StorageV2
+              --kind StorageV2 \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            az appservice plan create \
-              --name "$FUNCTIONS_PLAN_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION" \
-              --is-linux \
-              --sku B1
-
-            az appservice plan create \
-              --name "$WEB_PLAN_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION" \
-              --is-linux \
-              --sku B1
-
-            if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
+            if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Function App already exists. Skipping create."
             else
               az functionapp create \
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --storage-account "$STORAGE_ACCOUNT_NAME" \
-                --plan "$FUNCTIONS_PLAN_NAME" \
+                --flexconsumption-location "$AZURE_LOCATION" \
                 --runtime python \
                 --runtime-version 3.11 \
                 --functions-version 4 \
-                --os-type Linux
+                --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
-            az functionapp config appsettings set \
+            az functionapp config appsettings delete \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true
+              --setting-names SCM_DO_BUILD_DURING_DEPLOYMENT ENABLE_ORYX_BUILD \
+              --subscription "$AZURE_SUBSCRIPTION_ID" || true
 
-            if az webapp show --name "$WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
-              echo "Web App already exists. Skipping create."
+            if az staticwebapp show --name "$STATIC_WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
+              echo "Static Web App already exists. Skipping create."
             else
-              az webapp create \
-                --name "$WEB_APP_NAME" \
+              az staticwebapp create \
+                --name "$STATIC_WEB_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
-                --plan "$WEB_PLAN_NAME" \
-                --runtime "NODE|20-lts"
+                --location "$AZURE_LOCATION" \
+                --sku Free \
+                --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
-            az webapp config set \
-              --name "$WEB_APP_NAME" \
+            SWA_HOSTNAME=$(az staticwebapp show \
+              --name "$STATIC_WEB_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa"
+              --subscription "$AZURE_SUBSCRIPTION_ID" \
+              --query "defaultHostname" -o tsv)
+            FRONTEND_ORIGIN="https://${SWA_HOSTNAME}"
 
-            FRONTEND_ORIGIN="https://${WEB_APP_NAME}.azurewebsites.net"
             EXISTING_CORS=$(az functionapp cors show \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --query "allowedOrigins" -o tsv || true)
+              --query "allowedOrigins" -o tsv \
+              --subscription "$AZURE_SUBSCRIPTION_ID" || true)
             if echo "$EXISTING_CORS" | grep -qx "$FRONTEND_ORIGIN"; then
               echo "CORS origin already present."
             else
               az functionapp cors add \
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
-                --allowed-origins "$FRONTEND_ORIGIN"
+                --allowed-origins "$FRONTEND_ORIGIN" \
+                --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
