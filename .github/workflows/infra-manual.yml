@@ -13,6 +13,7 @@ env:
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
   STATIC_WEB_APP_NAME: app-growthmonitoring
+  FUNCTIONS_PLAN_NAME: asp-growthmonitoring-fn
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
 
 jobs:
@@ -70,16 +71,24 @@ jobs:
               --kind StorageV2 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
+            echo "==> Create backend app service plan"
+            az appservice plan create \
+              --name "$FUNCTIONS_PLAN_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION" \
+              --is-linux \
+              --sku B1 \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
+
             echo "==> Create/Update function app"
             if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Function App already exists. Skipping create."
-              echo "Note: Existing Function Apps are not auto-converted to Consumption by this pipeline."
             else
               az functionapp create \
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --storage-account "$STORAGE_ACCOUNT_NAME" \
-                --consumption-plan-location "$AZURE_LOCATION" \
+                --plan "$FUNCTIONS_PLAN_NAME" \
                 --runtime python \
                 --runtime-version 3.11 \
                 --functions-version 4 \
