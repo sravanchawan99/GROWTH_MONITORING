@@ -47,10 +47,10 @@ jobs:
 
             az group create \
               --name "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION"
+              --location "$AZURE_LOCATION" \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            SUB_ID=$(az account show --query id -o tsv)
-            CLEAN_SUB_ID=$(echo "$SUB_ID" | tr -d '-')
+            CLEAN_SUB_ID=$(echo "$AZURE_SUBSCRIPTION_ID" | tr -d '-')
             SUFFIX=${CLEAN_SUB_ID:0:8}
             STORAGE_ACCOUNT_NAME=$(echo "${STORAGE_ACCOUNT_PREFIX}${SUFFIX}" | tr '[:upper:]' '[:lower:]' | cut -c1-24)
 
@@ -59,23 +59,26 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION" \
               --sku Standard_LRS \
-              --kind StorageV2
+              --kind StorageV2 \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
             az appservice plan create \
               --name "$FUNCTIONS_PLAN_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION" \
               --is-linux \
-              --sku B1
+              --sku B1 \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
             az appservice plan create \
               --name "$WEB_PLAN_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION" \
               --is-linux \
-              --sku B1
+              --sku B1 \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
+            if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Function App already exists. Skipping create."
             else
               az functionapp create \
@@ -86,39 +89,45 @@ jobs:
                 --runtime python \
                 --runtime-version 3.11 \
                 --functions-version 4 \
-                --os-type Linux
+                --os-type Linux \
+                --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
             az functionapp config appsettings set \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true
+              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            if az webapp show --name "$WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
+            if az webapp show --name "$WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Web App already exists. Skipping create."
             else
               az webapp create \
                 --name "$WEB_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --plan "$WEB_PLAN_NAME" \
-                --runtime "NODE|20-lts"
+                --runtime "NODE|20-lts" \
+                --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
             az webapp config set \
               --name "$WEB_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa"
+              --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa" \
+              --subscription "$AZURE_SUBSCRIPTION_ID"
 
             FRONTEND_ORIGIN="https://${WEB_APP_NAME}.azurewebsites.net"
             EXISTING_CORS=$(az functionapp cors show \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --query "allowedOrigins" -o tsv || true)
+              --query "allowedOrigins" -o tsv \
+              --subscription "$AZURE_SUBSCRIPTION_ID" || true)
             if echo "$EXISTING_CORS" | grep -qx "$FRONTEND_ORIGIN"; then
               echo "CORS origin already present."
             else
               az functionapp cors add \
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
-                --allowed-origins "$FRONTEND_ORIGIN"
+                --allowed-origins "$FRONTEND_ORIGIN" \
+                --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
