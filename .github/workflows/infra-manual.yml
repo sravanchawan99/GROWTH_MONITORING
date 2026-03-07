@@ -13,7 +13,6 @@ env:
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
   STATIC_WEB_APP_NAME: app-growthmonitoring
-  FUNCTIONS_PLAN_NAME: asp-growthmonitoring-fn
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
 
 jobs:
@@ -28,36 +27,25 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Verify Azure context
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            set -euo pipefail
-            az account show -o table
-            az account set --subscription "${AZURE_SUBSCRIPTION_ID}"
-            az account show --query "{id:id, tenantId:tenantId, name:name}" -o table
       - name: Provision resources
         uses: azure/cli@v2
         with:
           inlineScript: |
             set -euo pipefail
             az account set --subscription "${AZURE_SUBSCRIPTION_ID}"
-            echo "==> Active subscription"
-            az account show --query "{id:id,name:name,tenantId:tenantId}" -o table
-            echo "==> Ensure required resource providers are registered"
+
             az provider register --namespace Microsoft.Storage --subscription "$AZURE_SUBSCRIPTION_ID" --wait
             az provider register --namespace Microsoft.Web --subscription "$AZURE_SUBSCRIPTION_ID" --wait
-            az provider show --namespace Microsoft.Storage --subscription "$AZURE_SUBSCRIPTION_ID" --query registrationState -o tsv
-            az provider show --namespace Microsoft.Web --subscription "$AZURE_SUBSCRIPTION_ID" --query registrationState -o tsv
-            echo "==> Create/Update resource group"
+
             az group create \
               --name "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION" \
               --subscription "$AZURE_SUBSCRIPTION_ID"
+
             CLEAN_SUB_ID=$(echo "$AZURE_SUBSCRIPTION_ID" | tr -d '-')
             SUFFIX=${CLEAN_SUB_ID:0:8}
             STORAGE_ACCOUNT_NAME=$(echo "${STORAGE_ACCOUNT_PREFIX}${SUFFIX}" | tr '[:upper:]' '[:lower:]' | cut -c1-24)
-            echo "==> Create storage account: $STORAGE_ACCOUNT_NAME"
+
             az storage account create \
               --name "$STORAGE_ACCOUNT_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -65,19 +53,7 @@ jobs:
               --sku Standard_LRS \
               --kind StorageV2 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
-            echo "==> Create/Update backend app service plan"
-            if az appservice plan show --name "$FUNCTIONS_PLAN_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
-              echo "Backend App Service Plan already exists. Skipping create."
-            else
-              az appservice plan create \
-                --name "$FUNCTIONS_PLAN_NAME" \
-                --resource-group "$RESOURCE_GROUP" \
-                --location "$AZURE_LOCATION" \
-                --is-linux \
-                --sku B1 \
-                --subscription "$AZURE_SUBSCRIPTION_ID"
-            fi
-            echo "==> Create/Update function app"
+
             if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Function App already exists. Skipping create."
             else
@@ -85,20 +61,19 @@ jobs:
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --storage-account "$STORAGE_ACCOUNT_NAME" \
-                --plan "$FUNCTIONS_PLAN_NAME" \
+                --flexconsumption-location "$AZURE_LOCATION" \
                 --runtime python \
                 --runtime-version 3.11 \
                 --functions-version 4 \
-                --os-type Linux \
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
-            echo "==> Configure function app settings"
+
             az functionapp config appsettings set \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true \
               --subscription "$AZURE_SUBSCRIPTION_ID"
-            echo "==> Create/Update Azure Static Web App"
+
             if az staticwebapp show --name "$STATIC_WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Static Web App already exists. Skipping create."
             else
@@ -109,13 +84,14 @@ jobs:
                 --sku Free \
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
-            echo "==> Configure function CORS"
+
             SWA_HOSTNAME=$(az staticwebapp show \
               --name "$STATIC_WEB_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --subscription "$AZURE_SUBSCRIPTION_ID" \
               --query "defaultHostname" -o tsv)
             FRONTEND_ORIGIN="https://${SWA_HOSTNAME}"
+
             EXISTING_CORS=$(az functionapp cors show \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
