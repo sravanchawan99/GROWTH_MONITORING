@@ -1,0 +1,113 @@
+name: Provision Azure Infrastructure (Manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_LOCATION: eastasia
+  RESOURCE_GROUP: rg-growthmonitoring
+  FUNCTION_APP_NAME: fa-growthmonitoring
+  WEB_APP_NAME: app-growthmonitoring
+  FUNCTIONS_PLAN_NAME: asp-growthmonitoring-fn
+  WEB_PLAN_NAME: asp-growthmonitoring-web
+  STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
+
+jobs:
+  provision:
+    environment: growthmonitoring
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Provision resources
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            set -euo pipefail
+
+            az group create \
+              --name "$RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION"
+
+            SUB_ID=$(az account show --query id -o tsv)
+            CLEAN_SUB_ID=$(echo "$SUB_ID" | tr -d '-')
+            SUFFIX=${CLEAN_SUB_ID:0:8}
+            STORAGE_ACCOUNT_NAME=$(echo "${STORAGE_ACCOUNT_PREFIX}${SUFFIX}" | tr '[:upper:]' '[:lower:]' | cut -c1-24)
+
+            az storage account create \
+              --name "$STORAGE_ACCOUNT_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION" \
+              --sku Standard_LRS \
+              --kind StorageV2
+
+            az appservice plan create \
+              --name "$FUNCTIONS_PLAN_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION" \
+              --is-linux \
+              --sku B1
+
+            az appservice plan create \
+              --name "$WEB_PLAN_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION" \
+              --is-linux \
+              --sku B1
+
+            if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
+              echo "Function App already exists. Skipping create."
+            else
+              az functionapp create \
+                --name "$FUNCTION_APP_NAME" \
+                --resource-group "$RESOURCE_GROUP" \
+                --storage-account "$STORAGE_ACCOUNT_NAME" \
+                --plan "$FUNCTIONS_PLAN_NAME" \
+                --runtime python \
+                --runtime-version 3.11 \
+                --functions-version 4 \
+                --os-type Linux
+            fi
+
+            az functionapp config appsettings set \
+              --name "$FUNCTION_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true
+
+            if az webapp show --name "$WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
+              echo "Web App already exists. Skipping create."
+            else
+              az webapp create \
+                --name "$WEB_APP_NAME" \
+                --resource-group "$RESOURCE_GROUP" \
+                --plan "$WEB_PLAN_NAME" \
+                --runtime "NODE|20-lts"
+            fi
+
+            az webapp config set \
+              --name "$WEB_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa"
+
+            FRONTEND_ORIGIN="https://${WEB_APP_NAME}.azurewebsites.net"
+            EXISTING_CORS=$(az functionapp cors show \
+              --name "$FUNCTION_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "allowedOrigins" -o tsv || true)
+            if echo "$EXISTING_CORS" | grep -qx "$FRONTEND_ORIGIN"; then
+              echo "CORS origin already present."
+            else
+              az functionapp cors add \
+                --name "$FUNCTION_APP_NAME" \
+                --resource-group "$RESOURCE_GROUP" \
+                --allowed-origins "$FRONTEND_ORIGIN"
+            fi
