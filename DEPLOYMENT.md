@@ -16,6 +16,7 @@ In GitHub repository:
    - `AZURE_CLIENT_ID`
    - `AZURE_TENANT_ID`
    - `AZURE_SUBSCRIPTION_ID`
+   - `AZURE_STATIC_WEB_APPS_API_TOKEN_APP_GROWTHMONITORING`
 
 If you use a GitHub Environment named `growthmonitoring`, add the same secrets there:
 
@@ -33,7 +34,7 @@ This creates/updates:
 
 - Resource Group: `rg-growthmonitoring`
 - Function App: `fa-growthmonitoring`
-- Web App: `app-growthmonitoring`
+- Static Web App: `app-growthmonitoring`
 - Location: `eastasia`
 
 ## 3) Run code deployment pipeline
@@ -43,11 +44,13 @@ This creates/updates:
 3. Click `Run workflow`.
 4. Wait for both jobs:
    - `Deploy Azure Function`
-   - `Build and Deploy Angular App`
+   - `Build and Deploy Angular App to Static Web App`
 
 ## 4) Validate deployment
 
-- Frontend URL: `https://app-growthmonitoring.azurewebsites.net`
+- Frontend URL:
+  - `https://<static-web-app-default-hostname>`
+  - Find hostname in Azure Portal -> `Static Web Apps` -> `app-growthmonitoring` -> `Overview`
 - Backend health test (example):
   - `POST https://fa-growthmonitoring.azurewebsites.net/api/predict_zone`
   - JSON body:
@@ -60,3 +63,15 @@ This creates/updates:
 - Workflows are manual only (`workflow_dispatch`), no auto-trigger on `push`.
 - Frontend API target is set to:
   - `https://fa-growthmonitoring.azurewebsites.net/api/predict_zone`
+
+## Get Static Web App deployment token
+
+Get token from Azure and save it as GitHub secret `AZURE_STATIC_WEB_APPS_API_TOKEN_APP_GROWTHMONITORING`.
+
+Azure Portal path:
+
+1. Open `Static Web Apps` -> `app-growthmonitoring`.
+2. Open `Manage deployment token`.
+3. Copy token.
+4. In GitHub repo, go to `Settings` -> `Secrets and variables` -> `Actions`.
+5. Create secret `AZURE_STATIC_WEB_APPS_API_TOKEN_APP_GROWTHMONITORING`.

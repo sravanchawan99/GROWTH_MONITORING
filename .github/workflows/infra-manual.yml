@@ -12,9 +12,7 @@ env:
   AZURE_SUBSCRIPTION_ID: 0823e843-0325-4ebf-8e6c-1b3d3daa50a9
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
-  WEB_APP_NAME: app-growthmonitoring
-  FUNCTIONS_PLAN_NAME: asp-growthmonitoring-fn
-  WEB_PLAN_NAME: asp-growthmonitoring-web
+  STATIC_WEB_APP_NAME: app-growthmonitoring
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
 
 jobs:
@@ -72,33 +70,16 @@ jobs:
               --kind StorageV2 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            echo "==> Create backend app service plan"
-            az appservice plan create \
-              --name "$FUNCTIONS_PLAN_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION" \
-              --is-linux \
-              --sku B1 \
-              --subscription "$AZURE_SUBSCRIPTION_ID"
-
-            echo "==> Create frontend app service plan"
-            az appservice plan create \
-              --name "$WEB_PLAN_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION" \
-              --is-linux \
-              --sku B1 \
-              --subscription "$AZURE_SUBSCRIPTION_ID"
-
             echo "==> Create/Update function app"
             if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Function App already exists. Skipping create."
+              echo "Note: Existing Function Apps are not auto-converted to Consumption by this pipeline."
             else
               az functionapp create \
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --storage-account "$STORAGE_ACCOUNT_NAME" \
-                --plan "$FUNCTIONS_PLAN_NAME" \
+                --consumption-plan-location "$AZURE_LOCATION" \
                 --runtime python \
                 --runtime-version 3.11 \
                 --functions-version 4 \
@@ -113,27 +94,25 @@ jobs:
               --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            echo "==> Create/Update frontend web app"
-            if az webapp show --name "$WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
-              echo "Web App already exists. Skipping create."
+            echo "==> Create/Update Azure Static Web App"
+            if az staticwebapp show --name "$STATIC_WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
+              echo "Static Web App already exists. Skipping create."
             else
-              az webapp create \
-                --name "$WEB_APP_NAME" \
+              az staticwebapp create \
+                --name "$STATIC_WEB_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
-                --plan "$WEB_PLAN_NAME" \
-                --runtime "NODE|20-lts" \
+                --location "$AZURE_LOCATION" \
+                --sku Free \
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
-            echo "==> Configure web app startup"
-            az webapp config set \
-              --name "$WEB_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa" \
-              --subscription "$AZURE_SUBSCRIPTION_ID"
-
             echo "==> Configure function CORS"
-            FRONTEND_ORIGIN="https://${WEB_APP_NAME}.azurewebsites.net"
+            SWA_HOSTNAME=$(az staticwebapp show \
+              --name "$STATIC_WEB_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --subscription "$AZURE_SUBSCRIPTION_ID" \
+              --query "defaultHostname" -o tsv)
+            FRONTEND_ORIGIN="https://${SWA_HOSTNAME}"
             EXISTING_CORS=$(az functionapp cors show \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
