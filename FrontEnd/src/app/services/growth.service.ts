@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class GrowthService {
-  private apiUrl = 'https://fa-growthmonitoring-egb5ghfrckc6czb8.centralindia-01.azurewebsites.net/api/predict_zone?';
+  private apiUrl = 'https://fa-growthmonitoring.azurewebsites.net/api/predict_zone';
 
   constructor(private http: HttpClient) {}
 
