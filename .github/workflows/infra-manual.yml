@@ -68,11 +68,11 @@ jobs:
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
 
-            az functionapp config appsettings set \
+            az functionapp config appsettings delete \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true \
-              --subscription "$AZURE_SUBSCRIPTION_ID"
+              --setting-names SCM_DO_BUILD_DURING_DEPLOYMENT ENABLE_ORYX_BUILD \
+              --subscription "$AZURE_SUBSCRIPTION_ID" || true
 
             if az staticwebapp show --name "$STATIC_WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
               echo "Static Web App already exists. Skipping create."
