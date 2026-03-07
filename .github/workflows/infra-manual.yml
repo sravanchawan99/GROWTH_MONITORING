@@ -9,6 +9,7 @@ permissions:
 
 env:
   AZURE_LOCATION: eastasia
+  AZURE_SUBSCRIPTION_ID: 0823e843-0325-4ebf-8e6c-1b3d3daa50a9
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
   WEB_APP_NAME: app-growthmonitoring
@@ -26,7 +27,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Verify Azure context
         uses: azure/cli@v2
@@ -34,7 +35,7 @@ jobs:
           inlineScript: |
             set -euo pipefail
             az account show -o table
-            az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            az account set --subscription "${AZURE_SUBSCRIPTION_ID}"
             az account show --query "{id:id, tenantId:tenantId, name:name}" -o table
 
       - name: Provision resources
@@ -42,7 +43,7 @@ jobs:
         with:
           inlineScript: |
             set -euo pipefail
-            az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            az account set --subscription "${AZURE_SUBSCRIPTION_ID}"
 
             az group create \
               --name "$RESOURCE_GROUP" \
