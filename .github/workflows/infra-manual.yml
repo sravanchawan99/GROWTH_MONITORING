@@ -71,14 +71,31 @@ jobs:
               --kind StorageV2 \
               --subscription "$AZURE_SUBSCRIPTION_ID"
 
-            echo "==> Create backend app service plan"
-            az appservice plan create \
-              --name "$FUNCTIONS_PLAN_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --location "$AZURE_LOCATION" \
-              --is-linux \
-              --sku B1 \
-              --subscription "$AZURE_SUBSCRIPTION_ID"
+            echo "==> Create/Update backend app service plan"
+            if az appservice plan show --name "$FUNCTIONS_PLAN_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
+              echo "App Service Plan already exists. Skipping create."
+            else
+              ATTEMPT=1
+              until [ $ATTEMPT -gt 3 ]
+              do
+                if az appservice plan create \
+                  --name "$FUNCTIONS_PLAN_NAME" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --location "$AZURE_LOCATION" \
+                  --is-linux \
+                  --sku B1 \
+                  --subscription "$AZURE_SUBSCRIPTION_ID"; then
+                  break
+                fi
+                echo "Plan create throttled/failed. Retry attempt $ATTEMPT of 3 after delay."
+                sleep $((ATTEMPT * 20))
+                ATTEMPT=$((ATTEMPT + 1))
+              done
+              if [ $ATTEMPT -gt 3 ]; then
+                echo "Failed to create App Service Plan after retries."
+                exit 1
+              fi
+            fi
 
             echo "==> Create/Update function app"
             if az functionapp show --name "$FUNCTION_APP_NAME" --resource-group "$RESOURCE_GROUP" --subscription "$AZURE_SUBSCRIPTION_ID" >/dev/null 2>&1; then
