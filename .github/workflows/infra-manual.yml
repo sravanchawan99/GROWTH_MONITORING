@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 env:
-  AZURE_LOCATION: eastasia
+  AZURE_LOCATION: centralindia
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
   STATIC_WEB_APP_NAME: app-growthmonitoring
