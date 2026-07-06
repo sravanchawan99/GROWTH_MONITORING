@@ -125,7 +125,7 @@ jobs:
                 --name "$WEB_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --plan "$APP_SERVICE_PLAN" \
-                --runtime "NODE:20-lts"
+                --runtime "NODE|22LTS"
 
             fi
 
