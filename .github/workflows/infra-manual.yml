@@ -13,6 +13,7 @@ env:
   FUNCTION_APP_NAME: fa-growthmonitoring
   STATIC_WEB_APP_NAME: app-growthmonitoring
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
+  STATIC_WEB_APP_LOCATION: eastasia
 
 jobs:
   Deploy_Infrastucure:
@@ -81,7 +82,7 @@ jobs:
               az staticwebapp create \
                 --name "$STATIC_WEB_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
-                --location "$AZURE_LOCATION" \
+                --location "$STATIC_WEB_APP_LOCATION" \
                 --sku Free \
                 --subscription "$AZURE_SUBSCRIPTION_ID"
             fi
