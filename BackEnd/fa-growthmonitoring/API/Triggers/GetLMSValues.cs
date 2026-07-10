@@ -50,7 +50,7 @@ namespace API.Triggers
 
                 // Currently requesting WLZ.
                 // Later this can come from the request body if required.
-                var lms = await _lmsService.GetLMSValues(child, "WLZ");
+                var lms = await _lmsService.GetLMSValues(child, "WAZ");
 
                 var response = req.CreateResponse(HttpStatusCode.OK);
 

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {}
+    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {}
   },
   "projects": {
-    "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj": {
+    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj",
+        "projectUniqueName": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj",
         "projectName": "API.Services",
-        "projectPath": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj",
-        "packagesPath": "C:\\Users\\Sravan Chawan\\.nuget\\packages\\",
-        "outputPath": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\obj\\",
+        "projectPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj",
+        "packagesPath": "C:\\Users\\schawan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Sravan Chawan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\schawan\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -68,21 +68,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.405/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.422/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {
+    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
+        "projectUniqueName": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
-        "packagesPath": "C:\\Users\\Sravan Chawan\\.nuget\\packages\\",
-        "outputPath": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\obj\\",
+        "projectPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
+        "packagesPath": "C:\\Users\\schawan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Sravan Chawan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\schawan\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -94,8 +94,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj": {
-                "projectPath": "d:\\Visual Studio\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj"
+              "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj": {
+                "projectPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj"
               }
             }
           }
@@ -148,7 +148,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.405/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.422/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -11,6 +11,7 @@ var host = new HostBuilder()
         services.AddScoped<FilePathProvider>();
         services.AddScoped<LMSforWLZ>();
         services.AddScoped<LMSService>();
+        services.AddScoped<LMSforWAZ>();
     })
     .Build();
 
