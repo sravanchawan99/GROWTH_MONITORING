@@ -8,17 +8,19 @@ namespace API.Services.Services
         private readonly ILogger<LMSService> _logger;
         private readonly LMSforWLZ _lmsforWLZ;
         private readonly LMSforWAZ _lmsforWAZ;
+        private readonly LMSforLAZ _lmsforLAZ;
         private readonly FilePathProvider _filePathProvider;
         public string filePath;
 
         public LMSService(
             ILogger<LMSService> logger,
             LMSforWLZ lmsforWLZ,
-            FilePathProvider filePathProvider, LMSforWAZ lmsforWAZ)
+            FilePathProvider filePathProvider, LMSforWAZ lmsforWAZ, LMSforLAZ lmsforLAZ)
         {
             _logger = logger;
             _lmsforWLZ = lmsforWLZ;
             _lmsforWAZ = lmsforWAZ;
+            _lmsforLAZ = lmsforLAZ;
             _filePathProvider = filePathProvider;
         }
 
@@ -37,8 +39,7 @@ namespace API.Services.Services
                     {
                         return await _lmsforWLZ.ProvideLMSforBoy(child, filePath);
                     }
-
-                    return await _lmsforWAZ.ProvideLMSforGirl(child, filePath);
+                    return await _lmsforWLZ.ProvideLMSforGirl(child, filePath);
                 case "WAZ":
 
                     filePath = _filePathProvider.ProvideFilePath(child, type);
@@ -49,6 +50,16 @@ namespace API.Services.Services
                     }
 
                     return await _lmsforWAZ.ProvideLMSforGirl(child, filePath);
+                case "LAZ":
+
+                    filePath = _filePathProvider.ProvideFilePath(child, type);
+
+                    if (child.Gender.Equals("M", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return await _lmsforLAZ.ProvideLMSforBoy(child, filePath);
+                    }
+
+                    return await _lmsforLAZ.ProvideLMSforGirl(child, filePath);
 
                 default:
 

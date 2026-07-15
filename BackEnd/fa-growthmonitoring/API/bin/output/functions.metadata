@@ -24,5 +24,31 @@
         "direction": "Out"
       }
     ]
+  },
+  {
+    "name": "GetZscore",
+    "scriptFile": "API.dll",
+    "entryPoint": "API.Triggers.Zscore.Run",
+    "language": "dotnet-isolated",
+    "properties": {
+      "IsCodeless": false
+    },
+    "bindings": [
+      {
+        "name": "req",
+        "direction": "In",
+        "type": "httpTrigger",
+        "authLevel": "Anonymous",
+        "methods": [
+          "post"
+        ],
+        "properties": {}
+      },
+      {
+        "name": "$return",
+        "type": "http",
+        "direction": "Out"
+      }
+    ]
   }
 ]

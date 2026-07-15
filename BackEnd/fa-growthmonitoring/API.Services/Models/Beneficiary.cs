@@ -6,5 +6,6 @@ namespace API.Services.Models
         public double age {get;set;}
         public double height{get;set;}
         public double weight{get;set;}
+        public string type{get;set;}
     }
 }

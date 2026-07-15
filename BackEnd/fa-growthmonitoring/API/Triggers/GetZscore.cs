@@ -8,20 +8,20 @@ using System.Text.Json;
 
 namespace API.Triggers
 {
-    public class LMSValue
+    public class Zscore
     {
-        private readonly ILogger<LMSValue> _logger;
-        private readonly LMSService _lmsService;
+        private readonly ILogger<Zscore> _logger;
+        private readonly ZScoreService _zscoreService;
 
-        public LMSValue(
-            ILogger<LMSValue> logger,
-            LMSService lmsService)
+        public Zscore(
+            ILogger<Zscore> logger,
+            ZScoreService zscoreService)
         {
             _logger = logger;
-            _lmsService = lmsService;
+            _zscoreService = zscoreService;
         }
 
-        [Function("GetLMSValue")]
+        [Function("GetZscore")]
         public async Task<HttpResponseData> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
         {
@@ -47,14 +47,13 @@ namespace API.Triggers
 
                     return badRequest;
                 }
-
-                // Currently requesting WLZ.
-                // Later this can come from the request body if required.
-                var lms = await _lmsService.GetLMSValues(child, child.type);
+                _logger.LogInformation(
+    "Received request for child details. Height: {Height}, Weight: {Weight}, Age: {Age}, Gender: {Gender}", child.height, child.weight, child.age, child.Gender);
+                var zscoreResult = await _zscoreService.ProvideZscore(child);
 
                 var response = req.CreateResponse(HttpStatusCode.OK);
 
-                await response.WriteAsJsonAsync(lms);
+                await response.WriteAsJsonAsync(zscoreResult);
 
                 return response;
             }

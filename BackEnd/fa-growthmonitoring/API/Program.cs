@@ -12,6 +12,8 @@ var host = new HostBuilder()
         services.AddScoped<LMSforWLZ>();
         services.AddScoped<LMSService>();
         services.AddScoped<LMSforWAZ>();
+        services.AddScoped<LMSforLAZ>();
+        services.AddScoped<ZScoreService>();
     })
     .Build();
 
