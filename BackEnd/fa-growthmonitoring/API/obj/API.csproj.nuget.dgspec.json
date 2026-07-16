@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {}
+    "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {}
   },
   "projects": {
     "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj": {
@@ -76,14 +76,14 @@
         }
       }
     },
-    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {
+    "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
+        "projectUniqueName": "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
+        "projectPath": "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
         "packagesPath": "C:\\Users\\schawan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\obj\\",
+        "outputPath": "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\schawan\\AppData\\Roaming\\NuGet\\NuGet.Config"
