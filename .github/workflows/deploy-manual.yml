@@ -110,7 +110,7 @@ jobs:
       - name: Restart Web App
         uses: azure/cli@v2
         with:
-        inlineScript: |
-         az webapp restart \
-         --resource-group "${{ env.RESOURCE_GROUP }}" \
-         --name "${{ env.WEB_APP_NAME }}"
+         inlineScript: |
+          az webapp restart \
+          --resource-group "${{ env.RESOURCE_GROUP }}" \
+          --name "${{ env.WEB_APP_NAME }}"
