@@ -14,7 +14,6 @@ env:
   APP_SERVICE_PLAN: asp-growthmonitoring
   WEB_APP_NAME: app-growthmonitoring
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
-  APP_INSIGHTS_NAME: appi-growthmonitoring
  
 jobs:
   Deploy_Infrastructure:
@@ -39,11 +38,9 @@ jobs:
  
             az account set --subscription "$AZURE_SUBSCRIPTION_ID"
  
-            # Register Azure Resource Providers
+            # Register Resource Providers
             az provider register --namespace Microsoft.Storage --wait
             az provider register --namespace Microsoft.Web --wait
-            az provider register --namespace Microsoft.Insights --wait
-            az provider register --namespace Microsoft.OperationalInsights --wait
  
             # Create Resource Group
             az group create \
@@ -73,30 +70,6 @@ jobs:
  
             fi
  
-            # Create Application Insights
-            if az monitor app-insights component show \
-              --app "$APP_INSIGHTS_NAME" \
-              --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
- 
-              echo "Application Insights already exists."
- 
-            else
- 
-              az monitor app-insights component create \
-                --app "$APP_INSIGHTS_NAME" \
-                --location "$AZURE_LOCATION" \
-                --resource-group "$RESOURCE_GROUP" \
-                --application-type web
- 
-            fi
- 
-            # Get Application Insights Connection String
-            APPINSIGHTS_CONNECTION_STRING=$(az monitor app-insights component show \
-              --app "$APP_INSIGHTS_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --query connectionString \
-              -o tsv)
- 
             # Create Function App (.NET 8 Isolated - Flex Consumption)
             if az functionapp show \
               --name "$FUNCTION_APP_NAME" \
@@ -114,13 +87,6 @@ jobs:
                 --runtime dotnet-isolated
  
             fi
- 
-            # Configure Application Insights
-            az functionapp config appsettings set \
-              --name "$FUNCTION_APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --settings \
-              APPLICATIONINSIGHTS_CONNECTION_STRING="$APPINSIGHTS_CONNECTION_STRING"
  
             # Disable Oryx Build
             az functionapp config appsettings delete \

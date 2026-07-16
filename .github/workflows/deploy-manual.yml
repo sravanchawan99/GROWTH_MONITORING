@@ -10,6 +10,7 @@ permissions:
 env:
   FUNCTION_APP_NAME: fa-growthmonitoring
   WEB_APP_NAME: app-growthmonitoring
+  RESOURCE_GROUP: rg-growthmonitoring
  
 jobs:
   deploy-backend:
@@ -82,9 +83,15 @@ jobs:
         with:
           inlineScript: |
             az webapp config appsettings set \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
               --name "${{ env.WEB_APP_NAME }}" \
-              --resource-group "rg-growthmonitoring" \
-              --settings APIUrl="https://fa-growthmonitoring.azurewebsites.net/api/GetLMSValue"
+              --settings APIUrl="https://${{ env.FUNCTION_APP_NAME }}.azurewebsites.net/api/GetLMSValue"
+ 
+            echo "Verifying APIUrl setting..."
+            az webapp config appsettings list \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.WEB_APP_NAME }}" \
+              --query "[?name=='APIUrl']"
  
       - name: Deploy to App Service
         uses: azure/webapps-deploy@v3
