@@ -1,77 +1,91 @@
 name: Deploy Backend and Frontend
-
+ 
 on:
   workflow_dispatch:
-
+ 
 permissions:
   id-token: write
   contents: read
-
+ 
 env:
   FUNCTION_APP_NAME: fa-growthmonitoring
   WEB_APP_NAME: app-growthmonitoring
-
+ 
 jobs:
   deploy-backend:
     name: Deploy Azure Function
     environment: growthmonitoring
     runs-on: ubuntu-latest
-
+ 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+ 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          python-version: "3.11"
-
+          dotnet-version: "8.0.x"
+ 
+      - name: Restore
+        run: dotnet restore BackEnd/fa-growthmonitoring/API/API.csproj
+ 
+      - name: Publish
+        run: dotnet publish BackEnd/fa-growthmonitoring/API/API.csproj -c Release -o publish
+ 
       - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+ 
       - name: Deploy Function App
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
-          package: BackEnd
-          remote-build: true
-
+          package: publish
+ 
   deploy-frontend:
     name: Build and Deploy Angular App
     environment: growthmonitoring
     runs-on: ubuntu-latest
     needs: deploy-backend
-
+ 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+ 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
           cache-dependency-path: FrontEnd/package-lock.json
-
+ 
       - name: Install dependencies
         working-directory: FrontEnd
         run: npm ci
-
+ 
       - name: Build Angular app
         working-directory: FrontEnd
         run: npm run build -- --configuration production
-
+ 
       - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+ 
+      - name: Configure Web App App Settings
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az webapp config appsettings set \
+              --name "${{ env.WEB_APP_NAME }}" \
+              --resource-group "rg-growthmonitoring" \
+              --settings APIUrl="https://fa-growthmonitoring.azurewebsites.net/api/GetLMSValue"
+ 
       - name: Deploy to App Service
         uses: azure/webapps-deploy@v3
         with:

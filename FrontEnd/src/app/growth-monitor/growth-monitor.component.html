@@ -1,38 +1,264 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card responsive-card">
-  <h2 class="title">Growth Monitoring Zone Predictor</h2>
-
+ 
+  <h2 class="title">Growth Monitoring Zone Checker</h2>
+ 
+  <p class="subtitle">
+    Enter the child's details to check the growth monitoring zone.
+  </p>
+ 
+  <!-- ===================== -->
+  <!-- Gender & Age -->
+  <!-- ===================== -->
+ 
   <div class="grid">
+ 
     <div class="field">
-      <label for="height">ఎత్తు(సెం.మీ)/ Height (cm)</label>
-      <input id="height" type="number" inputmode="decimal" formControlName="height" placeholder="e.g., 108" />
-      <small class="error" *ngIf="form.controls['height'].touched && form.controls['height'].invalid">
-        Height is required and must be greater than 0.
+ 
+      <label for="gender">
+        లింగం / Gender
+      </label>
+ 
+      <select
+        id="gender"
+        formControlName="gender">
+ 
+        <option value="">Select Gender</option>
+        <option value="M">Male</option>
+        <option value="F">Female</option>
+ 
+      </select>
+ 
+      <small
+        class="error"
+        *ngIf="form.get('gender')?.touched && form.get('gender')?.invalid">
+ 
+        Please select gender.
+ 
       </small>
+ 
     </div>
-
+ 
     <div class="field">
-      <label for="weight">బరువు(కీ.గ్రా)/ Weight (kg)</label>
-      <input id="weight" type="number" inputmode="decimal" formControlName="weight" placeholder="e.g., 12" />
-      <small class="error" *ngIf="form.controls['weight'].touched && form.controls['weight'].invalid">
-        Weight is required and must be greater than 0.
+ 
+      <label for="age">
+        వయస్సు (నెలలు) / Age (Months)
+      </label>
+ 
+      <select
+        id="age"
+        formControlName="age">
+ 
+        <option value="">Select Age</option>
+ 
+        <option
+          *ngFor="let month of months"
+          [value]="month">
+ 
+          {{ month }}
+ 
+        </option>
+ 
+      </select>
+ 
+      <small
+        class="error"
+        *ngIf="form.get('age')?.touched && form.get('age')?.invalid">
+ 
+        Please select age.
+ 
       </small>
+ 
     </div>
+ 
   </div>
-
+ 
+  <!-- ===================== -->
+  <!-- Height & Weight -->
+  <!-- ===================== -->
+ 
+  <div class="grid">
+ 
+    <div class="field">
+ 
+      <label for="height">
+ 
+        ఎత్తు (సెం.మీ) / Height (cm)
+ 
+      </label>
+ 
+      <input
+        id="height"
+        type="number"
+        formControlName="height"
+        placeholder="e.g. 82">
+ 
+      <small
+        class="error"
+        *ngIf="form.get('height')?.touched && form.get('height')?.invalid">
+ 
+        Enter valid height.
+ 
+      </small>
+ 
+    </div>
+ 
+    <div class="field">
+ 
+      <label for="weight">
+ 
+        బరువు (కీ.గ్రా) / Weight (kg)
+ 
+      </label>
+ 
+      <input
+        id="weight"
+        type="number"
+        formControlName="weight"
+        placeholder="e.g. 9.2">
+ 
+      <small
+        class="error"
+        *ngIf="form.get('weight')?.touched && form.get('weight')?.invalid">
+ 
+        Enter valid weight.
+ 
+      </small>
+ 
+    </div>
+ 
+  </div>
+ 
+  <!-- ===================== -->
+  <!-- Submit -->
+  <!-- ===================== -->
+ 
   <div class="actions">
-    <button class="submit-btn" type="submit" [disabled]="loading || form.invalid">
-      {{ loading ? 'Submitting...' : 'Submit' }}
+ 
+    <button
+      type="submit"
+      class="submit-btn"
+      [disabled]="loading || form.invalid">
+ 
+      {{ loading ? 'Checking...' : 'Submit' }}
+ 
     </button>
+ 
   </div>
+ 
 </form>
-
-<div *ngIf="apiResult" class="result responsive-result" [ngClass]="zoneClass()">
-    <div class="zone-line">
-      <strong>Zone:</strong>
-      <span class="zone-chip">{{ apiResult.zone }}</span>
-    </div>
-</div>
-
-<div *ngIf="errorMsg" class="error-banner responsive-error">
+ 
+<!-- ===================== -->
+<!-- Error -->
+<!-- ===================== -->
+ 
+<div
+  *ngIf="errorMsg"
+  class="error-banner">
+ 
   {{ errorMsg }}
+ 
+</div>
+ 
+<!-- ===================== -->
+<!-- Results -->
+<!-- ===================== -->
+ 
+<div
+  *ngIf="apiResult"
+  class="result-card">
+ 
+  <h3 class="result-title">
+ 
+    Growth Monitoring Results
+ 
+  </h3>
+ 
+  <!-- Wasting -->
+ 
+  <div
+    class="result-row"
+    [ngClass]="getZoneClass(apiResult.Wasting)">
+ 
+    <span>Wasting</span>
+ 
+    <span class="status-chip">
+ 
+      {{ apiResult.Wasting }}
+ 
+    </span>
+ 
+  </div>
+ 
+  <!-- Underweight -->
+ 
+  <div
+    class="result-row"
+    [ngClass]="getZoneClass(apiResult.Underweight)">
+ 
+    <span>Underweight</span>
+ 
+    <span class="status-chip">
+ 
+      {{ apiResult.Underweight }}
+ 
+    </span>
+ 
+  </div>
+ 
+  <!-- Stunting -->
+ 
+  <div
+    class="result-row"
+    [ngClass]="getZoneClass(apiResult.Stunting)">
+ 
+    <span>Stunting</span>
+ 
+    <span class="status-chip">
+ 
+      {{ apiResult.Stunting }}
+ 
+    </span>
+ 
+  </div>
+ 
+  <hr>
+ 
+  <!-- Numeric Results -->
+ 
+  <div class="measurement-row">
+ 
+    <span>Weight for Length (NWL)</span>
+ 
+    <strong>
+ 
+      {{ apiResult.NWL | number:'1.2-2' }}
+ 
+    </strong>
+ 
+  </div>
+ 
+  <div class="measurement-row">
+ 
+    <span>Weight for Age (NWA)</span>
+ 
+    <strong>
+ 
+      {{ apiResult.NWA | number:'1.2-2' }}
+ 
+    </strong>
+ 
+  </div>
+ 
+  <div class="measurement-row">
+ 
+    <span>Length for Age (NLA)</span>
+ 
+    <strong>
+ 
+      {{ apiResult.NLA | number:'1.2-2' }}
+ 
+    </strong>
+ 
+  </div>
+ 
 </div>

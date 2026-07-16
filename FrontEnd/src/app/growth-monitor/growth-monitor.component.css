@@ -1,141 +1,467 @@
-/* Base (mobile-first) */
+/* ======================================================
+   Global
+====================================================== */
+ 
 :host {
   display: block;
-  padding: 12px;
-  background: #fafafa;
+  min-height: 100vh;
+  padding: 20px;
+  background: #f4f7fb;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-
-.title {
-  font-size: 1.125rem;
-  line-height: 1.4;
-  margin: 0 0 12px 0;
-}
-
+ 
+/* ======================================================
+   Card
+====================================================== */
+ 
 .responsive-card {
-  width: 100%;
-  max-width: 640px;          /* keeps nice width on larger screens */
-  margin: 0 auto;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+ 
+  max-width: 900px;
+ 
+  margin: auto;
+ 
+  background: #ffffff;
+ 
+  border-radius: 18px;
+ 
+  padding: 35px;
+ 
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+ 
 }
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr; /* single column on phones */
-  gap: 12px;
+ 
+/* ======================================================
+   Title
+====================================================== */
+ 
+.title{
+ 
+  text-align:center;
+ 
+  font-size:38px;
+ 
+  color:#183B8C;
+ 
+  margin-bottom:10px;
+ 
+  font-weight:700;
+ 
 }
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+ 
+.subtitle{
+ 
+  text-align:center;
+ 
+  color:#6b7280;
+ 
+  margin-bottom:30px;
+ 
+  font-size:17px;
+ 
 }
-
-.field label {
-  font-weight: 600;
-  font-size: 0.95rem;
+ 
+/* ======================================================
+   Grid
+====================================================== */
+ 
+.grid{
+ 
+  display:grid;
+ 
+  grid-template-columns:repeat(2,1fr);
+ 
+  gap:22px;
+ 
+  margin-bottom:20px;
+ 
 }
-
-.field input[type='number'] {
-  width: 100%;
-  padding: 12px 14px;             /* comfortable tap target */
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 1rem;
-  line-height: 1.4;
+ 
+/* ======================================================
+   Fields
+====================================================== */
+ 
+.field{
+ 
+  display:flex;
+ 
+  flex-direction:column;
+ 
 }
-
-.submit-btn {
-  width: 100%;                    /* full width on phones */
-  margin-top: 8px;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #2563eb;
-  color: #fff;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
+ 
+.field label{
+ 
+  font-weight:600;
+ 
+  color:#374151;
+ 
+  margin-bottom:8px;
+ 
+  font-size:17px;
+ 
 }
-
-.submit-btn[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
+ 
+.field input,
+.field select{
+ 
+  width:100%;
+ 
+  height:54px;
+ 
+  padding:0 15px;
+ 
+  font-size:17px;
+ 
+  border-radius:10px;
+ 
+  border:1px solid #d1d5db;
+ 
+  background:white;
+ 
+  transition:.3s;
+ 
+  box-sizing:border-box;
+ 
 }
-
-.error {
-  color: #dc2626;
-  font-size: 0.85rem;
+ 
+.field input:focus,
+.field select:focus{
+ 
+  outline:none;
+ 
+  border-color:#2563eb;
+ 
+  box-shadow:0 0 0 3px rgba(37,99,235,.15);
+ 
 }
-
-/* Result and error blocks */
-.responsive-result {
-  width: 100%;
-  max-width: 640px;
-  margin: 12px auto 0 auto;
-  border-radius: 12px;
-  padding: 14px;
+ 
+/* ======================================================
+   Validation
+====================================================== */
+ 
+.error{
+ 
+  color:#dc2626;
+ 
+  margin-top:6px;
+ 
+  font-size:13px;
+ 
 }
-
-.responsive-error {
-  width: 100%;
-  max-width: 640px;
-  margin: 12px auto 0 auto;
-  padding: 12px;
-  border-radius: 10px;
+ 
+.error-banner{
+ 
+  max-width:900px;
+ 
+  margin:20px auto;
+ 
+  padding:15px;
+ 
+  background:#fee2e2;
+ 
+  color:#b91c1c;
+ 
+  border:1px solid #ef4444;
+ 
+  border-radius:10px;
+ 
 }
-
-/* Zone color mappings (unchanged) */
-.zone-red { background: #fee2e2; border: 1px solid #ef4444; }
-.zone-yellow { background: #fef9c3; border: 1px solid #eab308; }
-.zone-green { background: #dcfce7; border: 1px solid #22c55e; }
-.zone-unknown { background: #e5e7eb; border: 1px solid #9ca3af; }
-
-.result .result-content { display: grid; gap: 8px; }
-.zone-line { display: flex; align-items: center; gap: 8px; }
-.zone-chip {
-  padding: 2px 8px;
-  border-radius: 9999px;
-  background: rgba(255,255,255,0.3);
-  font-weight: 700;
+ 
+/* ======================================================
+   Button
+====================================================== */
+ 
+.actions{
+ 
+  display:flex;
+ 
+  justify-content:center;
+ 
+  margin-top:25px;
+ 
 }
-
-/* Enhancements for small tablets and up */
-@media (min-width: 480px) {
-  .title { font-size: 1.25rem; }
-  .field input[type='number'] { font-size: 1.05rem; }
-  .submit-btn { font-size: 1.05rem; }
+ 
+.submit-btn{
+ 
+  min-width:220px;
+ 
+  height:56px;
+ 
+  border:none;
+ 
+  border-radius:12px;
+ 
+  background:#2563eb;
+ 
+  color:white;
+ 
+  font-size:20px;
+ 
+  font-weight:600;
+ 
+  cursor:pointer;
+ 
+  transition:.3s;
+ 
 }
-
-/* Enhancements for tablets/desktops */
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on larger screens */
-    gap: 16px;
+ 
+.submit-btn:hover:not(:disabled){
+ 
+  background:#1d4ed8;
+ 
+}
+ 
+.submit-btn:disabled{
+ 
+  opacity:.6;
+ 
+  cursor:not-allowed;
+ 
+}
+ 
+/* ======================================================
+   Result Card
+====================================================== */
+ 
+.result-card{
+ 
+  max-width:900px;
+ 
+  margin:25px auto;
+ 
+  background:white;
+ 
+  border-radius:18px;
+ 
+  padding:30px;
+ 
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+ 
+}
+ 
+.result-title{
+ 
+  color:#183B8C;
+ 
+  font-size:28px;
+ 
+  font-weight:700;
+ 
+  margin-bottom:25px;
+ 
+}
+ 
+/* ======================================================
+   Status Cards
+====================================================== */
+ 
+.result-row{
+ 
+  display:flex;
+ 
+  justify-content:space-between;
+ 
+  align-items:center;
+ 
+  padding:18px;
+ 
+  margin-bottom:15px;
+ 
+  border-radius:12px;
+ 
+  font-size:18px;
+ 
+  font-weight:600;
+ 
+}
+ 
+.status-chip{
+ 
+  padding:8px 18px;
+ 
+  border-radius:25px;
+ 
+  background:rgba(255,255,255,.55);
+ 
+  font-weight:700;
+ 
+}
+ 
+/* ======================================================
+   Measurements
+====================================================== */
+ 
+.measurement-row{
+ 
+  display:flex;
+ 
+  justify-content:space-between;
+ 
+  align-items:center;
+ 
+  padding:16px 0;
+ 
+  border-bottom:1px solid #e5e7eb;
+ 
+  font-size:18px;
+ 
+}
+ 
+.measurement-row:last-child{
+ 
+  border-bottom:none;
+ 
+}
+ 
+.measurement-row strong{
+ 
+  color:#2563eb;
+ 
+  font-size:20px;
+ 
+}
+ 
+/* ======================================================
+   Divider
+====================================================== */
+ 
+hr{
+ 
+  border:none;
+ 
+  border-top:1px solid #e5e7eb;
+ 
+  margin:25px 0;
+ 
+}
+ 
+/* ======================================================
+   Zone Colors
+====================================================== */
+ 
+.zone-green{
+ 
+  background:#dcfce7;
+ 
+  border:1px solid #22c55e;
+ 
+}
+ 
+.zone-yellow{
+ 
+  background:#fef3c7;
+ 
+  border:1px solid #f59e0b;
+ 
+}
+ 
+.zone-red{
+ 
+  background:#fee2e2;
+ 
+  border:1px solid #ef4444;
+ 
+}
+ 
+.zone-unknown{
+ 
+  background:#f3f4f6;
+ 
+  border:1px solid #9ca3af;
+ 
+}
+ 
+/* ======================================================
+   Mobile
+====================================================== */
+ 
+@media(max-width:768px){
+ 
+  :host{
+ 
+    padding:12px;
+ 
   }
-  .submit-btn {
-    width: auto;                /* natural width on larger screens */
-    min-width: 160px;
+ 
+  .responsive-card,
+  .result-card{
+ 
+    padding:20px;
+ 
   }
-}
-.actions {
-  display: flex;
-  justify-content: center;   /* center horizontally */
-  margin-top: 12px;
-  width: 100%;
-}
-
-.submit-btn {
-  width: 100%;               /* full width on phones */
-  max-width: 260px;          /* cap width so it looks centered and tidy */
-}
-
-@media (min-width: 768px) {
-  .submit-btn {
-    width: auto;             /* natural width on larger screens */
-    min-width: 180px;
+ 
+  .grid{
+ 
+    grid-template-columns:1fr;
+ 
+    gap:16px;
+ 
   }
+ 
+  .title{
+ 
+    font-size:30px;
+ 
+  }
+ 
+  .subtitle{
+ 
+    font-size:15px;
+ 
+  }
+ 
+  .field label{
+ 
+    font-size:16px;
+ 
+  }
+ 
+  .field input,
+  .field select{
+ 
+    height:52px;
+ 
+    font-size:16px;
+ 
+  }
+ 
+  .submit-btn{
+ 
+    width:100%;
+ 
+    height:54px;
+ 
+    font-size:18px;
+ 
+  }
+ 
+  .result-title{
+ 
+    font-size:24px;
+ 
+  }
+ 
+  .result-row{
+ 
+    flex-direction:column;
+ 
+    align-items:flex-start;
+ 
+    gap:10px;
+ 
+    font-size:16px;
+ 
+  }
+ 
+  .status-chip{
+ 
+    align-self:flex-end;
+ 
+  }
+ 
+  .measurement-row{
+ 
+    font-size:16px;
+ 
+  }
+ 
 }
