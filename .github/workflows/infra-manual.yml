@@ -43,6 +43,7 @@ jobs:
             az provider register --namespace Microsoft.Storage --wait
             az provider register --namespace Microsoft.Web --wait
             az provider register --namespace Microsoft.Insights --wait
+            az provider register --namespace Microsoft.OperationalInsights --wait
  
             # Create Resource Group
             az group create \
