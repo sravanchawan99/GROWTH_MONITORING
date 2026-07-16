@@ -45,21 +45,7 @@ jobs:
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
           package: publish
-          
-      - name: Configure FunctionApp App Settings
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az functionapp config appsettings set \
-              --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --name "${{ env.FUNCTION_APP_NAME }}" \
-              --settings APIUrl="https://${{ env.FUNCTION_APP_NAME }}.azurewebsites.net/api/GetLMSValue"
- 
-            echo "Verifying APIUrl setting..."
-            az webapp config appsettings list \
-              --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --name "${{ env.FUNCTION_APP_NAME }}" \
-              --query "[?name=='APIUrl']"
+      
  
   deploy-frontend:
     name: Build and Deploy Angular App
@@ -92,6 +78,21 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+ 
+      - name: Configure FunctionApp App Settings
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az functionapp config appsettings set \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.FUNCTION_APP_NAME }}" \
+              --settings APIUrl="https://${{ env.FUNCTION_APP_NAME }}.azurewebsites.net/api/GetLMSValue"
+ 
+            echo "Verifying APIUrl setting..."
+            az functionapp config appsettings list \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.FUNCTION_APP_NAME }}" \
+              --query "[?name=='APIUrl']"
  
       - name: Deploy to App Service
         uses: azure/webapps-deploy@v3
