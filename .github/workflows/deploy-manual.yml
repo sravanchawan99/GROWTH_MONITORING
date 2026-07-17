@@ -9,7 +9,7 @@ permissions:
  
 env:
   FUNCTION_APP_NAME: fa-growthmonitoring
-  WEB_APP_NAME: app-growthmonitoring
+  WEB_APP_NAME: web-growthmonitoring
   RESOURCE_GROUP: rg-growthmonitoring
  
 jobs:
