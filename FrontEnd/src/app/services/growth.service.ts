@@ -16,7 +16,7 @@ export interface GrowthResponse {
 })
 export class GrowthService {
  
-  private apiUrl = 'http://localhost:7071/api/GetZscore';
+  private apiUrl = 'https://fa-growthmonitoring.azurewebsites.net/api/GetZscore';
  
   constructor(private http: HttpClient) {}
  
