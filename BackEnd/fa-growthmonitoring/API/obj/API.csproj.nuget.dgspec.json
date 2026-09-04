@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {}
+    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {}
   },
   "projects": {
     "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API.Services\\API.Services.csproj": {
@@ -72,18 +72,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.422/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.424/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {
+    "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
+        "projectUniqueName": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
+        "projectPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\API.csproj",
         "packagesPath": "C:\\Users\\schawan\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\obj\\",
+        "outputPath": "C:\\Users\\schawan\\VS_Code\\GROWTH_MONITORING\\BackEnd\\fa-growthmonitoring\\API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\schawan\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -152,7 +152,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.422/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.424/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

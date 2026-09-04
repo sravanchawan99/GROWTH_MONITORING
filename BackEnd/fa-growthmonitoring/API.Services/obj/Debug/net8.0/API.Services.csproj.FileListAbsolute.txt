@@ -14,6 +14,9 @@ D:\Visual Studio\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\
 D:\Visual Studio\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\Debug\net8.0\refint\API.Services.dll
 D:\Visual Studio\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\Debug\net8.0\API.Services.pdb
 D:\Visual Studio\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\Debug\net8.0\ref\API.Services.dll
+C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API\bin\output\API.Services.deps.json
+C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API\bin\output\API.Services.dll
+C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API\bin\output\API.Services.pdb
 C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\bin\Debug\net8.0\API.Services.deps.json
 C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\bin\Debug\net8.0\API.Services.dll
 C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\bin\Debug\net8.0\API.Services.pdb
@@ -27,6 +30,3 @@ C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Servi
 C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\Debug\net8.0\refint\API.Services.dll
 C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\Debug\net8.0\API.Services.pdb
 C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API.Services\obj\Debug\net8.0\ref\API.Services.dll
-C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API\bin\output\API.Services.deps.json
-C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API\bin\output\API.Services.dll
-C:\Users\schawan\VS_Code\GROWTH_MONITORING\BackEnd\fa-growthmonitoring\API\bin\output\API.Services.pdb
