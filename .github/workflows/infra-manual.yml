@@ -1,25 +1,25 @@
 name: Build and Deploy Infrastructure
-
+ 
 on:
   workflow_dispatch:
-
+ 
 permissions:
   id-token: write
   contents: read
-
+ 
 env:
   AZURE_LOCATION: centralindia
   RESOURCE_GROUP: rg-growthmonitoring
   FUNCTION_APP_NAME: fa-growthmonitoring
   APP_SERVICE_PLAN: asp-growthmonitoring
-  WEB_APP_NAME: app-growthmonitoring
+  WEB_APP_NAME: web-growthmonitoring
   STORAGE_ACCOUNT_PREFIX: stgrowthmonitoring
-
+ 
 jobs:
   Deploy_Infrastructure:
     environment: growthmonitoring
     runs-on: ubuntu-latest
-
+ 
     steps:
       - name: Azure Login
         uses: azure/login@v2
@@ -27,7 +27,7 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+ 
       - name: Deploy Infrastructure
         uses: azure/cli@v2
         env:
@@ -35,118 +35,117 @@ jobs:
         with:
           inlineScript: |
             set -euo pipefail
-
+ 
             az account set --subscription "$AZURE_SUBSCRIPTION_ID"
-
+ 
+            # Register Resource Providers
             az provider register --namespace Microsoft.Storage --wait
             az provider register --namespace Microsoft.Web --wait
-
+ 
             # Create Resource Group
             az group create \
               --name "$RESOURCE_GROUP" \
               --location "$AZURE_LOCATION"
-
+ 
             # Generate Storage Account Name
             CLEAN_SUB_ID=$(echo "$AZURE_SUBSCRIPTION_ID" | tr -d '-')
             SUFFIX=${CLEAN_SUB_ID:0:8}
             STORAGE_ACCOUNT_NAME=$(echo "${STORAGE_ACCOUNT_PREFIX}${SUFFIX}" | tr '[:upper:]' '[:lower:]' | cut -c1-24)
-
+ 
             # Create Storage Account
             if az storage account show \
               --name "$STORAGE_ACCOUNT_NAME" \
               --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
-
+ 
               echo "Storage Account already exists."
-
+ 
             else
-
+ 
               az storage account create \
                 --name "$STORAGE_ACCOUNT_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --location "$AZURE_LOCATION" \
                 --sku Standard_LRS \
                 --kind StorageV2
-
+ 
             fi
-
-            # Create Function App
+ 
+            # Create Function App (.NET 8 Isolated - Flex Consumption)
             if az functionapp show \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
-
+ 
               echo "Function App already exists."
-
+ 
             else
-
+ 
               az functionapp create \
                 --name "$FUNCTION_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --storage-account "$STORAGE_ACCOUNT_NAME" \
                 --flexconsumption-location "$AZURE_LOCATION" \
-                --runtime python \
-                --runtime-version 3.11 \
-                --functions-version 4
-
+                --runtime dotnet-isolated
+ 
             fi
-
+ 
             # Disable Oryx Build
             az functionapp config appsettings delete \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --setting-names SCM_DO_BUILD_DURING_DEPLOYMENT ENABLE_ORYX_BUILD || true
-
+ 
             # Create App Service Plan
             if az appservice plan show \
               --name "$APP_SERVICE_PLAN" \
               --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
-
+ 
               echo "App Service Plan already exists."
-
+ 
             else
-
+ 
               az appservice plan create \
                 --name "$APP_SERVICE_PLAN" \
                 --resource-group "$RESOURCE_GROUP" \
                 --location "$AZURE_LOCATION" \
                 --sku F1
-
+ 
             fi
-
+ 
             # Create Web App
             if az webapp show \
               --name "$WEB_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" >/dev/null 2>&1; then
-
+ 
               echo "Web App already exists."
-
+ 
             else
-
+ 
               az webapp create \
                 --name "$WEB_APP_NAME" \
                 --resource-group "$RESOURCE_GROUP" \
                 --plan "$APP_SERVICE_PLAN" \
-                --runtime "NODE|22LTS"
-
+                --runtime "NODE|22-lts"
+ 
             fi
-
+ 
             # Get Web App URL
             WEBAPP_HOSTNAME=$(az webapp show \
               --name "$WEB_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --query defaultHostName \
               -o tsv)
-
+ 
             FRONTEND_ORIGIN="https://${WEBAPP_HOSTNAME}"
-
+ 
             echo "Frontend URL: $FRONTEND_ORIGIN"
-
+ 
             # Configure Function App CORS
             EXISTING_CORS=$(az functionapp cors show \
               --name "$FUNCTION_APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --query allowedOrigins \
               -o tsv || true)
-
+ 
             if echo "$EXISTING_CORS" | grep -qx "$FRONTEND_ORIGIN"; then
               echo "CORS already configured."
             else

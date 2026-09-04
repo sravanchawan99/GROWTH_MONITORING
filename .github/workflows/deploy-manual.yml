@@ -1,79 +1,180 @@
 name: Deploy Backend and Frontend
-
+ 
 on:
   workflow_dispatch:
-
+ 
 permissions:
   id-token: write
   contents: read
-
+ 
 env:
   FUNCTION_APP_NAME: fa-growthmonitoring
-  WEB_APP_NAME: app-growthmonitoring
-
+  WEB_APP_NAME: web-growthmonitoring
+  RESOURCE_GROUP: rg-growthmonitoring
+ 
 jobs:
   deploy-backend:
     name: Deploy Azure Function
     environment: growthmonitoring
     runs-on: ubuntu-latest
-
+ 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+ 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          python-version: "3.11"
-
+          dotnet-version: "8.0.x"
+ 
+      - name: Restore
+        run: dotnet restore BackEnd/fa-growthmonitoring/API/API.csproj
+ 
+      - name: Publish
+        run: dotnet publish BackEnd/fa-growthmonitoring/API/API.csproj -c Release -o publish
+ 
       - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+ 
       - name: Deploy Function App
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
-          package: BackEnd
-          remote-build: true
+          package: publish
 
+      - name: Configure FunctionApp App Settings
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az functionapp config appsettings set \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.FUNCTION_APP_NAME }}" \
+              --settings APIUrl="https://${{ env.FUNCTION_APP_NAME }}.azurewebsites.net/api/GetLMSValue"
+ 
+            echo "Verifying APIUrl setting..."
+            az functionapp config appsettings list \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.FUNCTION_APP_NAME }}" \
+              --query "[?name=='APIUrl']"
+      
+ 
   deploy-frontend:
     name: Build and Deploy Angular App
     environment: growthmonitoring
     runs-on: ubuntu-latest
     needs: deploy-backend
-
+ 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+ 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
           cache-dependency-path: FrontEnd/package-lock.json
-
+ 
       - name: Install dependencies
         working-directory: FrontEnd
         run: npm ci
-
+ 
       - name: Build Angular app
         working-directory: FrontEnd
         run: npm run build -- --configuration production
-
+      - name: Show build output
+        run: |
+          echo "Contents of dist:"
+          find FrontEnd/dist -type f
+ 
       - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Create deployment package
+        run: |
+          # Archive the *contents* of the Angular output directory.  Deploying
+          # the parent directory can leave index.html one level below wwwroot.
+          cd FrontEnd/dist/front-end
 
-      - name: Deploy to App Service
-        uses: azure/webapps-deploy@v3
+          # This is a Linux Node App Service, so it needs a Node process to
+          # serve the pre-built Angular files. It also returns index.html for
+          # Angular client-side routes.
+          cat > server.js <<'EOF'
+          const http = require('http');
+          const fs = require('fs');
+          const path = require('path');
+
+          const root = __dirname;
+          const mimeTypes = {
+            '.css': 'text/css', '.html': 'text/html', '.ico': 'image/x-icon',
+            '.js': 'text/javascript', '.json': 'application/json',
+            '.map': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml',
+            '.woff': 'font/woff', '.woff2': 'font/woff2'
+          };
+
+          function sendFile(filePath, response, fallbackToIndex) {
+            fs.readFile(filePath, (error, content) => {
+              if (error) {
+                if (fallbackToIndex) return sendFile(path.join(root, 'index.html'), response, false);
+                response.writeHead(404);
+                return response.end('Not found');
+              }
+              response.writeHead(200, { 'Content-Type': mimeTypes[path.extname(filePath)] || 'application/octet-stream' });
+              response.end(content);
+            });
+          }
+
+          http.createServer((request, response) => {
+            const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+            const relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
+            const filePath = path.resolve(root, relativePath);
+            if (!filePath.startsWith(root + path.sep) && filePath !== root) {
+              response.writeHead(400);
+              return response.end('Invalid path');
+            }
+            sendFile(filePath, response, !path.extname(relativePath));
+          }).listen(process.env.PORT || 8080, '0.0.0.0');
+          EOF
+
+          zip -r ../frontend.zip .
+
+      - name: Deploy Angular app to App Service
+        uses: azure/cli@v2
         with:
-          app-name: ${{ env.WEB_APP_NAME }}
-          package: FrontEnd/dist/front-end
+          inlineScript: |
+            # A previous run-from-package configuration can make App Service
+            # keep serving an older/default package instead of this ZIP deploy.
+            az webapp config appsettings delete \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.WEB_APP_NAME }}" \
+              --setting-names WEBSITE_RUN_FROM_PACKAGE || true
+
+            # --clean removes Azure's placeholder Node site before extracting
+            # the Angular build into the App Service wwwroot directory.
+            az webapp deploy \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.WEB_APP_NAME }}" \
+              --src-path FrontEnd/dist/frontend.zip \
+              --type zip \
+              --clean true
+
+            # Node 22 Linux App Service does not automatically start an app.
+            # Configure the server included in the deployment package.
+            az webapp config set \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --name "${{ env.WEB_APP_NAME }}" \
+              --startup-file "node server.js"
+
+      - name: Verify deployed site
+        run: |
+          curl --fail --retry 12 --retry-all-errors --retry-delay 5 \
+            "https://${{ env.WEB_APP_NAME }}.azurewebsites.net/" \
+            | grep -F "GROWTH MONITORING ZONE PREDICTOR"
